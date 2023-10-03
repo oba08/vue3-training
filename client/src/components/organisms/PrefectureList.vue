@@ -1,51 +1,92 @@
 <script lang="ts" setup>
-import { onMounted, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import axiosInstance from "@/utils/axiosSettings"
 import { PrefectureDisplay } from "@/types/prefecture"
-
-// const chiba = ref("千葉県")
+import { PrefectureResponse } from "@/types/api"
 
 // TODO: prefectureで千葉県を表示してみましょう
-const prefecture = ref<PrefectureDisplay>({
-  prefCode: 0,
-  prefName: "千葉県",
-  isCheck: false
+
+// const prefecture = ref<PrefectureDisplay>({
+//   prefCode: 0,
+//   prefName: "千葉県",
+//   isCheck: false
+// })
+
+const prefectureListDisplay = ref<PrefectureDisplay[]>([
+  {
+    prefCode: 1,
+    prefName: "東京都",
+    isCheck: false
+  },
+  {
+    prefCode: 2,
+    prefName: "千葉県",
+    isCheck: false
+  },
+  {
+    prefCode: 3,
+    prefName: "神奈川県",
+    isCheck: false
+  },
+  {
+    prefCode: 4,
+    prefName: "埼玉県",
+    isCheck: false
+  }
+])
+const isCheckedPrefectureList = computed(() =>
+  prefectureListDisplay.value.filter((x) => x.isCheck)
+)
+const isCheckedPrefectureList2 = computed({
+  get: () => prefectureListDisplay.value.filter((x) => x.isCheck),
+  set: () => prefectureListDisplay.value
 })
 
-// function change() {
-//   prefecture.value.isCheck = !prefecture.value.isCheck
-// }
-
-// function change(eve: boolean) {
-//   prefecture.value.isCheck = eve
-// }
-
-onMounted(() => {
+onMounted(async () => {
   // TODO: 全県取得のAPIへリクエストを送ってみましょう!
-  const response = axiosInstance.get("")
+  const response = await axiosInstance.get<PrefectureResponse>("/prefectures")
+  prefectureListDisplay.value = response.data.result.map((x) => {
+    return {
+      ...x,
+      isCheck: false
+    }
+  })
 })
 </script>
 <template>
   <div class="prefecture-container">
     <h3>都道府県</h3>
-    <!-- <div>{{ chiba }}</div> -->
-    <div class="prefecture-flex">
-      <!-- TODO: 県を表示してみましょう -->
-      {{ prefecture.prefName }}
-      {{ prefecture.isCheck }}
-      <!-- <input
-        type="checkbox"
-        @change="prefecture.isCheck = !prefecture.isCheck"
-      /> -->
-      <!-- <input
-        type="checkbox"
-        checked="prefecture.isCheck"
-        value="prefecture.isCheck"
-        @change="change(!prefecture.isCheck)"
-      /> -->
-      <input v-model="prefecture.isCheck" type="checkbox" />
-      <!-- <input type="checkbox" @input="change" /> -->
-      <div v-if="prefecture.isCheck">isChecked</div>
+    <div v-for="pref in prefectureListDisplay" :key="pref.prefCode">
+      <!-- <div class="prefecture-flex"> -->
+      <div>
+        <!-- TODO: 県を表示してみましょう -->
+        <input v-model="pref.isCheck" type="checkbox" />
+        {{ pref.prefName }}
+        {{ pref.isCheck }}
+        <span v-if="pref.isCheck">isChecked</span>
+      </div>
+    </div>
+    <div>
+      チェックされた都道府県
+      <div
+        v-for="isCheckedPref in isCheckedPrefectureList"
+        :key="isCheckedPref.prefCode"
+      >
+        <div class="prefecture-flex">・{{ isCheckedPref.prefName }}</div>
+      </div>
+    </div>
+    <div>
+      チェックされた都道府県(get,set)
+      <div
+        v-for="isCheckedPref in isCheckedPrefectureList2"
+        :key="isCheckedPref.prefCode"
+      >
+        <div class="prefecture-flex">・{{ isCheckedPref.prefName }}</div>
+      </div>
+    </div>
+    <div>
+      都道府県一覧
+      <div>{{}}</div>
     </div>
   </div>
 </template>
