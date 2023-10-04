@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue"
 import axiosInstance from "@/utils/axiosSettings"
 import { PrefectureDisplay } from "@/types/prefecture"
 import { PrefectureResponse } from "@/types/api"
+import PrefectureCheckVue from "@/components/organisms/PrefectureCheck.vue"
 
 // TODO: prefectureで千葉県を表示してみましょう
 
@@ -12,35 +13,22 @@ import { PrefectureResponse } from "@/types/api"
 //   isCheck: false
 // })
 
-const prefectureListDisplay = ref<PrefectureDisplay[]>([
-  {
-    prefCode: 1,
-    prefName: "東京都",
-    isCheck: false
-  },
-  {
-    prefCode: 2,
-    prefName: "千葉県",
-    isCheck: false
-  },
-  {
-    prefCode: 3,
-    prefName: "神奈川県",
-    isCheck: false
-  },
-  {
-    prefCode: 4,
-    prefName: "埼玉県",
-    isCheck: false
-  }
-])
+const prefectureListDisplay = ref<PrefectureDisplay[]>([])
 const isCheckedPrefectureList = computed(() =>
   prefectureListDisplay.value.filter((x) => x.isCheck)
 )
-const isCheckedPrefectureList2 = computed({
-  get: () => prefectureListDisplay.value.filter((x) => x.isCheck),
-  set: () => prefectureListDisplay.value
-})
+
+function handleCheck(pref: PrefectureDisplay) {
+  const index = prefectureListDisplay.value.findIndex(
+    (x) => x.prefCode === pref.prefCode
+  )
+  prefectureListDisplay.value[index].isCheck = pref.isCheck
+}
+
+// const isCheckedPrefectureList2 = computed({
+//   get: () => prefectureListDisplay.value.filter((x) => x.isCheck),
+//   set: () => prefectureListDisplay.value
+// })
 
 onMounted(async () => {
   // TODO: 全県取得のAPIへリクエストを送ってみましょう!
@@ -56,16 +44,28 @@ onMounted(async () => {
 <template>
   <div class="prefecture-container">
     <h3>都道府県</h3>
-    <div v-for="pref in prefectureListDisplay" :key="pref.prefCode">
-      <!-- <div class="prefecture-flex"> -->
+    <div class="prefecture-flex">
+      <div v-for="pref in prefectureListDisplay" :key="pref.prefCode">
+        <!-- <div class="prefecture-flex"> -->
+        <div>
+          <!-- TODO: 県を表示してみましょう -->
+          <PrefectureCheckVue
+            v-if="prefectureListDisplay.length"
+            :prefecture="pref"
+            @check="handleCheck"
+          ></PrefectureCheckVue>
+          {{ pref.isCheck }}
+        </div>
+      </div>
+    </div>
+    <!-- <div v-for="pref in prefectureListDisplay" :key="pref.prefCode">
       <div>
-        <!-- TODO: 県を表示してみましょう -->
         <input v-model="pref.isCheck" type="checkbox" />
         {{ pref.prefName }}
         {{ pref.isCheck }}
         <span v-if="pref.isCheck">isChecked</span>
       </div>
-    </div>
+    </div> -->
     <div>
       チェックされた都道府県
       <div
@@ -75,7 +75,7 @@ onMounted(async () => {
         <div class="prefecture-flex">・{{ isCheckedPref.prefName }}</div>
       </div>
     </div>
-    <div>
+    <!-- <div>
       チェックされた都道府県(get,set)
       <div
         v-for="isCheckedPref in isCheckedPrefectureList2"
@@ -83,10 +83,13 @@ onMounted(async () => {
       >
         <div class="prefecture-flex">・{{ isCheckedPref.prefName }}</div>
       </div>
-    </div>
+    </div> -->
     <div>
-      都道府県一覧
-      <div>{{}}</div>
+      子コンポーネント
+      <PrefectureCheckVue
+        v-if="prefectureListDisplay.length"
+        :prefecture="prefectureListDisplay[0]"
+      />
     </div>
   </div>
 </template>

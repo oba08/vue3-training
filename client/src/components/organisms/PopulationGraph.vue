@@ -32,6 +32,7 @@ const c3GraphConfig = ref<ChartConfiguration>({
 function initC3Graph() {
   const graphData = generate(c3GraphConfig.value)
   // TODO: グラフをstoreに保存してみましょう。
+  console.log(graphData)
 }
 onMounted(() => {
   initC3Graph()
